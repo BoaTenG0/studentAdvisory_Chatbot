@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Advisory Chatbot</title>
+    <style>
+        #chatbot-container {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            width: 300px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 1000;
+            padding: 0px 10px;
+        }
+        #chatbot-form {
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+        h1{
+            margin-left: 10px;
+        }
+        #question {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            outline: none;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #prediction-result {
+            background-color: #f8f9fa;
+            border-top: 1px solid #ddd;
+            padding: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="chatbot-container">
+        <h1>Chatbot</h1>
+        <form id="chatbot-form">
+            <textarea id="question" name="question" placeholder="Ask me something..." rows="3"></textarea>
+            <button type="submit">Send</button>
+        </form>
+        <div id="prediction-result"></div>
+    </div>
+
+    <script>
+        document.getElementById("chatbot-form").addEventListener("submit", function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get user input from the form
+            var question = document.getElementById("question").value;
+
+            // Send a POST request to the Flask server
+            fetch("/predict", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ question: question })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.predicted_category !== undefined) {
+                        // Display the prediction result to the user
+                        document.getElementById("prediction-result").innerText = "Response: " + data.predicted_category;
+                    } else if (data.error) {
+                        // Handle any error message sent from the server
+                        document.getElementById("prediction-result").innerText = "Error: " + data.error;
+                    } else {
+                        // Handle any other case
+                        document.getElementById("prediction-result").innerText = "An unexpected error occurred.";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+        });
+    </script>
+</body>
+
+</html>
